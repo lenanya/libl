@@ -1,6 +1,9 @@
 all: file memory
 
-lib/lsys.o: src/lsys.S
+lib/: 
+	mkdir lib
+
+lib/lsys.o: src/lsys.S lib/
 	as -g src/lsys.S -o lib/lsys.o
 
 memory: memory.o lib/lsys.o
