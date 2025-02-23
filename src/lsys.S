@@ -321,6 +321,10 @@
 .global _kexec_file_load
 .global _bpf
 
+.global _start 
+_start:
+    call main
+    call _exit
 
 _read:
     movq $0, %rax 

@@ -1,7 +1,7 @@
 #include "include/lsys.h"
 #include "include/lstring.h"
 
-void _start() {
+int main() {
 	char* to_write = "Hello from C\n";
 	int fd = _open("output", O_RDWR | O_CREAT, 0644);
 	if (fd < 0) {
@@ -11,5 +11,5 @@ void _start() {
 
 	_write(fd, to_write, lstrlen(to_write));
 	_close(fd);
-	_exit(0);
+	return 0;
 }
