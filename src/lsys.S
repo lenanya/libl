@@ -1,3 +1,6 @@
+# access to syscalls so i can call them from C
+# dont use any that have >2 arguments, because C and assembly use different
+# registers for the third one (C: %rcx, asm: %r10) (fixed in _mmap)
 .global _read
 .global _write
 .global _open

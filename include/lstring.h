@@ -1,6 +1,7 @@
 #ifndef LSTRING_H
 #define LSTRING_H
 #include "lmem.h"
+#include "lmath.h"
 
 int lstrlen(char* str) {
 	int i = 0;
@@ -53,9 +54,29 @@ char* itoa(int n) {
 		ret[i] = 0x2D; // "-"
 		++i;
 	}	
-	ret[i] = 0; // null terminate string so cstrlen and strrev work
+	ret[i] = 0; // null terminate string so strlen and strrev work
 	strrev(ret); // reverse the string
 	return ret;
+}
+
+int is_digit(char c) {
+	return (c <= 0x39 && c >= 0x30);
+}
+
+int atoi(char* str) { // returns 0 on failure
+	int negative = 0;
+	size_t length = lstrlen(str);
+	if (!length) return 0;
+	int result = 0;
+	for (int i = length - 1; i >= 0; --i) {
+		if (i == 0 && str[i] == '-')  {
+			negative = 1;
+			break;
+		}
+		if (!is_digit(str[i])) return 0;
+		result += (str[i] - 0x30) * (pow(10, length - 1 - i));
+	}
+	return result;
 }
 
 #endif
