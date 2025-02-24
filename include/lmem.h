@@ -26,21 +26,56 @@
 #define MAP_SYNC 0x80000
 #define MAP_UNITIALIZED 0x4000000
 
+#define PAGESIZE 4096
+
 typedef long off_t;
 
 void* _mmap(void* addr, size_t len, int prot, int flags, int fd, off_t offset); 
 int _munmap(void* addr, size_t len);
 int _mprotect(void* addr, size_t len, int prot);
 
+#define PAGESIZE 4096
+
 void* alloc(size_t size) {
-    void* mem =  _mmap(NULL, size + sizeof(size_t), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
-    if (mem == (void*)-1) _exit(1);
-    *((size_t*)mem) = size;
-    return mem + sizeof(size_t);
+    size_t memsize = ((size + sizeof(ssize_t)) / PAGESIZE + 1) * PAGESIZE; // one more page than size / 4096
+    void* mem =  _mmap(NULL, memsize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+    if (mem == (void*)-1) return NULL;
+    *((ssize_t*)mem) = memsize;
+    return mem + sizeof(ssize_t);
 }
 
+/* start of actual memory management instead of allocating a full page lmao
+void* alloc(size_t size) {
+    if (!_PAGE_COUNT) {
+        _HEAP_BASE = _mmap(NULL, PAGESIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+        if (_HEAP_BASE == (void*)-1) return NULL;
+        *(ssize_t*)_HEAP_BASE = size;
+        _PAGE_COUNT += 1;
+        void* mem = _HEAP_BASE + sizeof(ssize_t);
+        return mem;
+    } else {
+        ssize_t position = 0;
+        while (position < 4096) {
+            ssize_t space = *(ssize_t*)_HEAP_BASE + position;
+            if (space > 0) position += space;
+            else {
+                if (space * -1 > size) {
+                    *(ssize_t*)(_HEAP_BASE + position) = size;
+                    return (void*)(_HEAP_BASE + position)+sizeof(ssize_t);
+                }
+                if (position + size + sizeof(ssize_t) > 4096) {
+                    // allocate a new page idfk yet how to keep track
+                } else if (space == 0) {
+                    
+                }
+            } 
+        }
+    }
+}
+*/
+
 void memcpy(void* dest, void* src) {
-    size_t size = *((size_t*)(src - sizeof(size_t)));
+    ssize_t size = *((ssize_t*)(src - sizeof(ssize_t)));
     for (size_t i = 0; i < size; ++i) ((unsigned char*)dest)[i] = ((unsigned char*)src)[i];
 }
 
@@ -49,8 +84,8 @@ void memncpy(void* dest, void* src, size_t n) {
 }
 
 void free(void* mem) {
-    size_t size = *(size_t*)(mem-sizeof(size_t)) + sizeof(size_t);
-    _munmap(mem - sizeof(size_t), size);
+    ssize_t size = *(ssize_t*)(mem-sizeof(ssize_t)) + sizeof(ssize_t);
+    _munmap(mem - sizeof(ssize_t), size);
 }
 
 void* ralloc(void* org, size_t new_size) {

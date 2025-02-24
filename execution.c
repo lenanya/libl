@@ -8,7 +8,7 @@ int main() {
         0x0F, 0x05};  // syscall
 
     // create memory
-    unsigned char* code = _mmap(NULL, 16, PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+    unsigned char* code = _mmap(NULL, PAGESIZE, PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
     if (code == (void*)-1) _exit(1);
     for (int i = 0; i < 16; ++i) {
         code[i] = original_code[i]; // move code into memory
