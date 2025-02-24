@@ -372,6 +372,7 @@ _mmap:
     ret
 _mprotect:
     movq $10, %rax 
+    movq %rcx, %r10
     syscall 
     ret
 _munmap:

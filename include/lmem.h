@@ -30,9 +30,11 @@ typedef long off_t;
 
 void* _mmap(void* addr, size_t len, int prot, int flags, int fd, off_t offset); 
 int _munmap(void* addr, size_t len);
+int _mprotect(void* addr, size_t len, int prot);
 
 void* alloc(size_t size) {
     void* mem =  _mmap(NULL, size + sizeof(size_t), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);
+    if (mem == (void*)-1) _exit(1);
     *((size_t*)mem) = size;
     return mem + sizeof(size_t);
 }

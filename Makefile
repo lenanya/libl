@@ -1,7 +1,7 @@
 all: file memory numberstuff execution
 
-CFLAGS = -ggdb -nostdlib -Wno-builtin-declaration-mismatch -c
-LDFLAGS = -g -nostdlib
+CFLAGS = -ggdb -nolibc -nostdlib -fno-stack-protector -Wno-builtin-declaration-mismatch -c
+LDFLAGS = -g
 ASFLAGS = -g
 
 lib/: 
